@@ -52,7 +52,7 @@ public class TpUIAccueil extends Application {
 //		Action des boutton
 		retour.setOnAction(e->{
 			Stage stage1 = (Stage) retour.getScene().getWindow();
-			Accueil accueil = new Accueil();
+			Accueil accueil = new Accueil(nom);
 			Stage stage = new Stage();
 			try {
 				accueil.start(stage);
@@ -63,7 +63,7 @@ public class TpUIAccueil extends Application {
 		});
 		faireSolution.setOnAction(e->{
 			Stage stage1 = (Stage) faireSolution.getScene().getWindow();
-			InterfaceTP tp = new InterfaceTP();
+			InterfaceTP tp = new InterfaceTP(nom);
 			Stage stage = new Stage();
 			try {
 				tp.start(stage);
@@ -74,7 +74,7 @@ public class TpUIAccueil extends Application {
 		});
 		creerMolecule.setOnAction(e1 -> {
 			Stage stage1 = (Stage) creerMolecule.getScene().getWindow();
-			TpCreation tpCreation = new TpCreation();
+			TpCreation tpCreation = new TpCreation(nom);
 			Stage stage = new Stage();
 			try {
 				tpCreation.start(stage);
@@ -83,6 +83,10 @@ public class TpUIAccueil extends Application {
 			}
 			stage1.close();
 		});
+	}
+	String nom;
+	public TpUIAccueil(String nom) {
+		this.nom= nom;
 	}
 
 }

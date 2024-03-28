@@ -11,8 +11,11 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -21,6 +24,7 @@ import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -28,7 +32,15 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class InterfaceTP extends Application {
-	Boolean finirVersement = false;
+	Label legende = new Label("Legende :");
+	Label lGaz = new Label("1-Gaz");
+	Label tubevide= new Label("2-Tube vide");
+	Label ethanol = new Label("3-Ethanol");
+	Label lbecher = new Label("4-Becher");
+	Label lion = new Label("5-Ion dichromate");
+	GridPane gp1 = new GridPane();
+	boolean finirVersement = false;
+	boolean becherEnPosition = false;
 	private int iBecher = 0;
     Group tube1Group = new Group();
 	Group tube2Group = new Group();
@@ -42,9 +54,14 @@ public class InterfaceTP extends Application {
     private final Scene scene = new Scene(bp, 1354, 750);
     VBox vboxEcrit = new VBox();
     Label Equation = new Label();
-    Button Equilibrer = new Button("EQUILIBRER");
+    Button Equilibrer = new Button();
     private int i = 0;
+    boolean ionDichomateVerser = false;
     private int iGaz = 0;
+    Button home = new Button();
+	Button retour = new Button();
+	Button PositionInitiale = new Button();
+	HBox piedDePage = new HBox(home,retour);
 //    private int i1 = 0;
 
     @Override
@@ -52,10 +69,36 @@ public class InterfaceTP extends Application {
         setupUI(primaryStage);
         
     }
-
+    
+    public ImageView imageView(String nom,int l,int L) {
+		String path = "D:\\eclipse\\avatars\\"+nom+".png";
+		Image image = new Image(path);
+		ImageView imageView = new ImageView(image);
+		imageView.setFitWidth(l);
+		imageView.setFitHeight(L);
+		imageView.setPreserveRatio(true);
+		return imageView;
+	}
+    
 	private void setupUI(Stage stage) {
-		
-		boolean iIons = false;
+		gp1.add(legende, 0, 0);
+		gp1.add(lGaz, 0, 1);
+		gp1.add(tubevide, 0, 2);
+		gp1.add(ethanol, 0, 3);
+		gp1.add(lbecher, 0, 4);
+		gp1.add(lion, 0, 5);
+		retour.setGraphic(imageView("pngtree-return-icon-image_1344469-removebg-preview", 50, 50));
+		piedDePage.setSpacing(75);
+		home.setGraphic(imageView("retour", 50, 50));
+		Equilibrer.setVisible(false);
+		Cylinder baseIonDichromate = new Cylinder(20,60);
+		Box boxIonDichromate = new Box(40,5,0);
+		boxIonDichromate.setTranslateY(-30);
+		boxIonDichromate.setMaterial(new javafx.scene.paint.PhongMaterial(Color.BLACK));
+		Group IonDichromate = new Group(baseIonDichromate,boxIonDichromate);
+		IonDichromate.setTranslateX(300);
+		IonDichromate.setTranslateY(40);
+//		boolean iIons = false;
 		Line barreBecherGauche = new Line(-25, 50, -25, 160);
 		barreBecherGauche.setStroke(Color.BLACK);
 		barreBecherGauche.setStrokeWidth(2);
@@ -74,6 +117,7 @@ public class InterfaceTP extends Application {
 		liquideEau.setFill(Color.SKYBLUE);
 		Circle cercle = new Circle(20, Color.RED);
 		Text texte = new Text("ceci est un test");
+		Text texteExplicatif = new Text();
 		cercle.setTranslateY(25);
 		hboxBar.getChildren().addAll(sortir, titre);
 		Box piedGaz = new Box(50, 5, 0);
@@ -113,6 +157,7 @@ public class InterfaceTP extends Application {
 		StackPane root = new StackPane();
 		HBox hbox = new HBox(root, vboxEcrit);
 		bp.setTop(hbox);
+		bp.setBottom(piedDePage);
 		stage.setScene(scene);
 		stage.setTitle("INTERFACE TP");
 		stage.show();
@@ -156,7 +201,7 @@ public class InterfaceTP extends Application {
 		becher1Group.getChildren().addAll(barreBecherDroite,barreBecherGauche,baseBecher, becherContenu, becherContenuVolume);
 
 		// Ajouter les groupes au nœud racine
-		root.getChildren().addAll(GazGroupComplet, tube1Group, tube2Group, becher1Group, table);
+		root.getChildren().addAll(gp1,GazGroupComplet, tube1Group, tube2Group, becher1Group, table,IonDichromate);
 
 		// Déplacer les groupes
 		tube1Group.setTranslateX(100);
@@ -179,6 +224,17 @@ public class InterfaceTP extends Application {
 				SequentialTransition stG1 = new SequentialTransition(translateTransitionGaz1);
 				stG1.play();
 			}
+		});
+		home.setOnAction(e->{
+			Stage stage1 = (Stage) home.getScene().getWindow();
+			TpUIAccueil itp = new TpUIAccueil(nom);
+			Stage stage2 = new Stage();
+			try {
+				itp.start(stage2);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			stage1.close();
 		});
 		tube1Group.setOnMouseClicked(event -> {
 			i++;
@@ -221,9 +277,18 @@ public class InterfaceTP extends Application {
 						rotateTransition, translateTransition2);
 				st.play();
 				st.setOnFinished(ef->{
-					finirVersement = true;
+					if(becherEnPosition) {
+						finirVersement = true;
+					}
+					if((finirVersement ) && (ionDichomateVerser) && (becherEnPosition)) {
+						texte.setText("Solution Ehtanol avec ion Dichromate");
+						Equation.setText("C2H5OH + Cr2O7²¯ -----> CH3COOH + H2O ");
+						Equilibrer.setText("EQUILIBRER");
+						Equilibrer.setVisible(true);
+					}
 				});
-				if (i == 2 && (finirVersement)) {
+				
+				if (i == 2 && (finirVersement) && (becherEnPosition)) {
 				    becherContenuVolume.setFill(Color.SKYBLUE);
 
 				    // Démarrez la transition de remplissage en même temps que la première rotation
@@ -248,11 +313,15 @@ public class InterfaceTP extends Application {
 					root.getChildren().add(rectangleVersement);
 					rectangleVersement.setTranslateY(400);
 					rectangleVersement.setTranslateX(190);
-					becherContenuVolume.setFill(Color.SKYBLUE);
+					if(becherEnPosition) {
+						becherContenuVolume.setFill(Color.SKYBLUE);
+					}
 				});
 				rotateTransition1.setOnFinished(e2->{
 					root.getChildren().remove(rectangleVersement);
-					becherContenuVolume.setFill(Color.BLUE);
+					if(becherEnPosition) {
+						becherContenuVolume.setFill(Color.SKYBLUE);
+					}
 				});
 			}
 		});
@@ -263,8 +332,15 @@ public class InterfaceTP extends Application {
 				TranslateTransition translateTransition = new TranslateTransition(Duration.seconds(1), becher1Group);
 				translateTransition.setToY(435);
 				translateTransition.play();
+				becherEnPosition= true;
 			} else {
-				
+				finirVersement = false;
+				becherEnPosition= false;
+				ionDichomateVerser = false;
+				texte.setText("Solution :");
+				Equation.setText("");
+				texteExplicatif.setText("");
+				Equilibrer.setVisible(false);
 				TranslateTransition translateTransition11tr = new TranslateTransition(Duration.seconds(2),
 						becher1Group);
 				translateTransition11tr.setToY(30);
@@ -275,6 +351,34 @@ public class InterfaceTP extends Application {
 				});	
 			}
 		});
+		IonDichromate.addEventHandler(MouseEvent.MOUSE_PRESSED,  (MouseEvent e1) ->{
+			TranslateTransition translateTransition1 = new TranslateTransition(Duration.seconds(2), IonDichromate);
+			translateTransition1.setToY(IonDichromate.getTranslateY()+250);
+			TranslateTransition translateTransition1X = new TranslateTransition(Duration.seconds(2), IonDichromate);
+			translateTransition1X.setToX(IonDichromate.getTranslateX()-35);
+			TranslateTransition translateTransition1XR = new TranslateTransition(Duration.seconds(2), IonDichromate);
+			translateTransition1XR.setToX(IonDichromate.getTranslateX()+25);
+			RotateTransition rotateTransition = new RotateTransition(Duration.seconds(3), IonDichromate);
+			rotateTransition.setByAngle(-100);
+			TranslateTransition translateTransition1R = new TranslateTransition(Duration.seconds(2), IonDichromate);
+			translateTransition1R.setToY(IonDichromate.getTranslateY()-20);
+			RotateTransition rotateTransitionR = new RotateTransition(Duration.seconds(3), IonDichromate);
+			rotateTransitionR.setByAngle(100);
+			SequentialTransition st1l = new SequentialTransition(translateTransition1,translateTransition1X,rotateTransition,rotateTransitionR,translateTransition1XR,translateTransition1R);
+			st1l.play();
+			rotateTransition.setOnFinished(est1l->{
+				if(becherEnPosition) {
+					ionDichomateVerser = true;
+				}
+				if((finirVersement ) && (ionDichomateVerser) && (becherEnPosition)) {
+					texte.setText("Solution : Ethanol plus ion Dichromate");
+					Equation.setText("C2H5OH + Cr2O7²¯ -----> CH3COOH + H2O ");
+					Equilibrer.setText("EQUILIBRER");
+					Equilibrer.setVisible(true);
+				}
+			});	
+			
+		} );
 		cercle.setOnMouseClicked(event -> {
 			// Changez la couleur du cercle en fonction de la couleur actuelle
 			if (cercle.getFill() == Color.RED) {
@@ -285,10 +389,17 @@ public class InterfaceTP extends Application {
 				becGaz.setMaterial(new javafx.scene.paint.PhongMaterial(Color.BLACK));
 			}
 		});
-		if((becherContenuVolume.getFill()==Color.SKYBLUE ) && (iIons)) {
-			texte.setText("Solution Alcool avec ion X");
-			
-		}
-		vboxEcrit.getChildren().addAll(texte,Equation,Equilibrer);
+		Equilibrer.setOnAction(e->{
+			Equation.setText("C2H5OH + Cr2O7²¯ + 16H+ -----> 3CH3COOH + 4Cr³+ + 11H2O ");
+			Equilibrer.setVisible(false);
+			texteExplicatif.setText("Remarque : Il en est consommé 16 H+ (8 x 2),\n il se forme 10 H+ (2 x 5),\n le bilan donne 16 – 10 = 6 H+ consommés. x 4. \nRemarque : Il en est consommé 32 H+ (8 x 4),\n il se forme 20 H+ (4 x 5), \nle bilan donne 32 – 20 = 12 H+ consommés.");
+		});
+		
+		vboxEcrit.getChildren().addAll(texte,Equation,Equilibrer,texteExplicatif);
+		
+	}
+	String nom;
+	public InterfaceTP(String nom) {
+		this.nom= nom;
 	}
 }

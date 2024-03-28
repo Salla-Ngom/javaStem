@@ -43,9 +43,14 @@ public class InterfaceCours extends Application {
 	VBox vb1 = new VBox(message);
 	VBox vbChimie = new VBox();
 	VBox vbSvt = new VBox();
+	String nom;
+	public String Accueil(String nom) {
+		this.nom= nom;
+		return nom;
+	}
 	public void start(Stage arg0) throws Exception {
 		sortir.setOnAction(e->{
-			Accueil acceuil = new Accueil();
+			Accueil acceuil = new Accueil(nom);
 			Stage stage =  (Stage) sortir.getScene().getWindow();
 			Stage stage1 = new Stage();
 			acceuil.start(stage1);
