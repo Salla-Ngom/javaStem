@@ -1,0 +1,2 @@
+#!/bin/bash
+TODO .../jdk8/jre/bin/java -Xmx1024m -Djavafx.animation.fullspeed=true -Dprism.dirtyopts=false -Dprism.verbose=false -Dquantum.multithreaded=true -cp ./jimModelBrowserJFX-0_4_1.jar com.interactivemesh.jfx.modelbrowser.ModelBrowserJFX  
